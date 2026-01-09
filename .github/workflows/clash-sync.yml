@@ -1,0 +1,39 @@
+name: Clash Subscription Auto Sync
+
+on:
+  # 定时执行：每5分钟
+  schedule:
+    - cron: '*/5 * * * *'
+  
+  # 手动触发
+  workflow_dispatch:
+  
+  # 当仓库有推送时执行（可选）
+  push:
+    branches: [main]
+    paths:
+      - 'sync-clash.sh'
+
+jobs:
+  sync-clash:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 检出代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      # 安装curl
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y curl
+      
+      # 执行同步脚本
+      - name: Run Clash sync script
+        env:
+          # 使用GitHub Secrets存储敏感信息
+          GIST_ID: ${{ secrets.GIST_ID }}
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+          GIST_FILENAME: ${{ secrets.GIST_FILENAME }}
+        run: |
+          chmod +x sync-clash.sh
+          ./sync-clash.sh
